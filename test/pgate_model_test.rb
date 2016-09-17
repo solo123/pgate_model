@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class PgateModel::Test < ActiveSupport::TestCase
+class PgateModelTest < ActiveSupport::TestCase
   test "truth" do
     assert_kind_of Module, PgateModel
   end

@@ -1,0 +1,42 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+jimmy_liang:
+  client_payment_id: 1
+  send_time: MyString
+  send_seq_id: MyString
+  trans_type: MyString
+  organization_id: MyString
+  pay_pass: 1
+  img_url: MyString
+  trans_amt: 100
+  fee: 1
+  card_no: 6225886556455713
+  name: 梁益华
+  id_num: 450303197005030016
+  body: 普尔测试商品01
+  notify_url: MyString
+  callback_url: MyString
+  resp_code: MyString
+  resp_desc: MyString
+  mac: MyString
+  status: 0
+
+one:
+  client_payment_id: 1
+  send_time: MyString
+  send_seq_id: MyString
+  trans_type: MyString
+  organization_id: MyString
+  pay_pass: MyString
+  img_url: MyString
+  trans_amt: MyString
+  fee: MyString
+  card_no: MyString
+  name: MyString
+  id_num: MyString
+  body: MyString
+  notify_url: MyString
+  callback_url: MyString
+  resp_code: MyString
+  resp_desc: MyString
+  mac: MyString
