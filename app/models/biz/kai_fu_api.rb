@@ -7,6 +7,11 @@ module Biz
     CALLBACK_URL = 'http://112.74.184.236:8010/recv_callback'
     OPENID_B001_FLDS = "sendTime,sendSeqId,transType,organizationId,payPass,transAmt,fee,cardNo,name,idNum,body,notifyUrl,callbackUrl"
 
+    def send_kaifu_payment(client_payment)
+      if client_payment.trans_type == 'P001'
+        create_b001(client_payment)
+      end
+    end
     def create_b001(client_payment)
       gw = KaifuGateway.new(
         client_payment_id: client_payment.id,
@@ -28,7 +33,10 @@ module Biz
       gw.mac = mac
       gw.save
 
-      return send_kaifu(js)
+      ret_js = send_kaifu(js)
+      client_payment.update(ret_js)
+      gw.update(ret_js)
+      ret_js
     end
 
     def get_mac(kf_data)
@@ -56,9 +64,9 @@ module Biz
       if resp.is_a?(Net::HTTPRedirection)
         return {resp_code: '00', resp_desc: '交易成功', status: 8, redirect_url: resp['location']}
       elsif resp.is_a?(Net::HTTPOK)
-        js = resp.body
+        js = JSON.parse(resp.body)
       else
-        js = {resp_code: '96', resp_desc: '系统故障'}
+        js = {resp_code: '96', resp_desc: '系统故障', status: 7}
       end
     end
   end

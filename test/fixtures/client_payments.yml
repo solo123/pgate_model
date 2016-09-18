@@ -13,4 +13,27 @@ valid_one:
   order_title: test001
   notify_url: http://localhost:3000/abc
   callback_url: http://localhost:3000/def
+  mac: 123123
+  status: 0
+
+invalid_fields_01:
+  org_id: client1
+  trans_type: PPP
+  mac: 123123123123123
+  status: 0
+
+invalid_mac_one:
+  org_id: client1
+  trans_type: P001
+  order_time: 20160915120101
+  order_id: TST001
+  pay_pass: 1
+  amount: 1000
+  fee: 0
+  card_no: 1234234534564567
+  card_holder_name: zhangsan
+  person_id_num: 450101197001010011
+  order_title: test001
+  notify_url: http://localhost:3000/abc
+  callback_url: http://localhost:3000/def
   status: 0
