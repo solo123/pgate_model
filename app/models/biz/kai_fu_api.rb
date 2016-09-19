@@ -44,8 +44,10 @@ module Biz
       mab = ''
       OPENID_B001_FLDS.split(',').sort.each do |k|
         field_name = k.underscore
-        mab << kf_data[field_name]
-        js << "'#{k}':'#{kf_data[field_name]}'"
+        if kf_data[field_name]
+          mab << kf_data[field_name]
+          js << "'#{k}':'#{kf_data[field_name]}'"
+        end
       end
       mab << TMK
       mac = Digest::MD5.hexdigest(mab)
