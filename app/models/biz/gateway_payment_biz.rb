@@ -1,7 +1,7 @@
 module Biz
   class GatewayPaymentBiz
     def check_required_params(params)
-      js = {resp_code: '99'}
+      js = {resp_code: '00'}
       miss_flds =  []
       %W(org_id trans_type mac).each {|fld| miss_flds << fld if params[fld.to_sym].nil? }
       if miss_flds.length > 0
@@ -13,7 +13,7 @@ module Biz
         else
           mab = ''
           params.keys.sort.each do |fld|
-            if fld != :mac
+            if fld != "mac"
               mab << params[fld]
             end
           end
