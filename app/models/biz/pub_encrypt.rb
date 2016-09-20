@@ -10,6 +10,12 @@ module Biz
       s.join
     end
 
+    def md5_mac(js, tmk)
+      mab = ''
+      js.keys.sort.each { |k| mab << js[k] if k != 'mac' }
+      Digest::MD5.hexdigest(mab + tmk)
+    end
+
     def xor_8(input_string)
       bs = input_string.bytes
       result_block = []
