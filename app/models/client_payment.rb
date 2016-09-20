@@ -1,6 +1,10 @@
 class ClientPayment < ActiveRecord::Base
   belongs_to :client
 
+  def tst
+    self.fee = 101
+  end
+
   def check_payment_fields
     if trans_type == 'P001'
       return check_p001
@@ -19,12 +23,11 @@ class ClientPayment < ActiveRecord::Base
       update(js)
     else
       client = Client.find_by(org_id: org_id)
-      if fee == 0
-        fee = amount * client.d0_min_percent / 1000000 + client.d0_min_fee
+      if self.fee == 0
+        self.fee = self.amount * client.d0_min_percent / 1000000 + client.d0_min_fee
       end
       js = {resp_code: '00'}
     end
-    self.save
     return js
   end
 end

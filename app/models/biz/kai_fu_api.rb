@@ -13,8 +13,7 @@ module Biz
       end
     end
     def create_b001(client_payment)
-      gw = KaifuGateway.new(
-        client_payment_id: client_payment.id,
+      js = {
         send_time: Time.now.strftime("%Y%m%d%H%M%S"),
         send_seq_id: "P1" + ('%06d' % client_payment.id),
         trans_type: 'B001',
@@ -28,9 +27,10 @@ module Biz
         body: "#{client_payment.client.name} - #{client_payment.order_title}",
         notify_url: NOTIFY_URL,
         callback_url: CALLBACK_URL
-        )
-      mab, js, mac = get_mac(gw)
-      gw.mac = mac
+      }
+      js[:mac] = get_mac(js, client_payment.client.tmk)
+      gw = KaifuGateway.new(js)
+      gw.client_payment = client_payment
       gw.save
 
       ret_js = send_kaifu(js)
@@ -39,37 +39,32 @@ module Biz
       ret_js
     end
 
-    def get_mac(kf_data)
-      js = []
+    def get_mac(js, tmk)
       mab = ''
-      OPENID_B001_FLDS.split(',').sort.each do |k|
-        field_name = k.underscore
-        if kf_data[field_name]
-          mab << kf_data[field_name]
-          js << "'#{k}':'#{kf_data[field_name]}'"
-        end
-      end
-      mab << TMK
+      js.keys.sort.each {|k| mab << js[k] }
+      mab << tmk
       mac = Digest::MD5.hexdigest(mab)
-      js << "'mac':'#{mac}'"
-      [mab, "{#{js.join(',')}}", mac]
+      mac
     end
 
     def send_kaifu(js)
       uri = URI(Biz::KaiFuApi::API_URL_OPENID)
-      resp = Net::HTTP.post_form(uri, data: js)
+      resp = Net::HTTP.post_form(uri, data: js.to_h)
 
       Rails.logger.info '------KaiFu D0 B001------'
-      Rails.logger.info resp.to_s
-      Rails.logger.info resp.to_hash
+      Rails.logger.info 'data = ' + js.to_s
+      Rails.logger.info 'resp = ' + resp.to_s
+      Rails.logger.info 'resp = ' + resp.to_hash.to_s
+      Rails.logger.info 'resp.body = ' + resp.body.to_s
 
       if resp.is_a?(Net::HTTPRedirection)
-        return {resp_code: '00', resp_desc: '交易成功', status: 8, redirect_url: resp['location']}
+        j = {resp_code: '00', resp_desc: '交易成功', status: 8, redirect_url: resp['location']}
       elsif resp.is_a?(Net::HTTPOK)
-        js = JSON.parse(resp.body)
+        j = {resp_code: '99', resp_desc: resp.body.to_s}
       else
-        js = {resp_code: '96', resp_desc: '系统故障', status: 7}
+        j = {resp_code: '96', resp_desc: '系统故障', status: 7}
       end
+      j
     end
   end
 end
