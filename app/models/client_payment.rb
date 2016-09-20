@@ -20,13 +20,14 @@ class ClientPayment < ActiveRecord::Base
     if miss_flds.length > 0
       status = 7
       js = {resp_code: '30', resp_desc: '缺少必须的字段: ' + miss_flds.join(', ') }
-      update(js)
     else
       client = Client.find_by(org_id: org_id)
-      if self.fee == 0
-        self.fee = self.amount * client.d0_min_percent / 1000000 + client.d0_min_fee
+      lowest_fee = self.amount * client.d0_min_percent / 1000000 + client.d0_min_fee
+      if self.fee < lowest_fee
+        js = {resp_code: '30', resp_desc: '手续费不正确: ' + lowest_fee.to_s}
+      else
+        js = {resp_code: '00'}
       end
-      js = {resp_code: '00'}
     end
     return js
   end

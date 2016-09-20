@@ -1,19 +1,5 @@
 module Biz
   class PosEncrypt
-    def self.test_data
-      key = 'AB73C9416D41E936E82AAC11053BCEDD'
-      mab = '20160913201609132016091320160913'
-      puts "key = " + key
-      puts "mab = " + mab
-      puts "result = " + pos_ecb(mab, key)
-    end
-    def self.test_data1
-      key = '2222222222222222'
-      mab = ['1234567890ABCDEFABCDEF1234567890'].pack('H*')
-      puts "key = " + key
-      puts "mab = " + mab.unpack('H*')[0]
-      puts "result = " + pos_ecb(mab, key)
-    end
     def self.pos_ecb(mab_string, key)
       result_block = xor_8(mab_string)
       result_block_hex = result_block.unpack('H*')[0]
