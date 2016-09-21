@@ -1,6 +1,7 @@
 class ClientPayment < ActiveRecord::Base
   belongs_to :client
   scope :show_order, -> {order('id desc')}
+  D0_FIELDS = %W(order_time order_id order_title pay_pass amount fee card_no card_holder_name person_id_num notify_url callback_url mac)
 
   def check_payment_fields
     case trans_type
@@ -8,16 +9,21 @@ class ClientPayment < ActiveRecord::Base
       return check_p001
     when 'P002'
       return check_p002
+    when 'P003'
+      return check_p003
     else
       return {resp_code: '12', resp_desc: '无此交易: ' + trans_type}
     end
   end
 
   def check_p001
-    return check_field_and_fee %W(order_time order_id order_title pay_pass amount fee card_no card_holder_name person_id_num notify_url callback_url mac)
+    return check_field_and_fee D0_FIELDS
   end
   def check_p002
     return check_field_and_fee %W(order_time order_id order_title pay_pass amount fee notify_url callback_url mac)
+  end
+  def check_p003
+    return check_field_and_fee D0_FIELDS
   end
   def check_field_and_fee(fields)
     miss_flds =  []
