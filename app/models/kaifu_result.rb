@@ -12,8 +12,9 @@ class KaifuResult < ActiveRecord::Base
       self.client = cp.client
       self.organization_id = cp.org_id
       self.client_payment = cp
-      if kaifu_result.notify_url.empty?
-        kaifu_result.status = 7
+      self.notify_url = cp.notify_url
+      if self.notify_url.empty?
+        self.status = 7
       end
     end
 
