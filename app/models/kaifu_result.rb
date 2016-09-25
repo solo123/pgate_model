@@ -7,7 +7,8 @@ class KaifuResult < ActiveRecord::Base
   belongs_to :client_payment
 
   def init_validate
-    if self.status == 0 && (cp = ClientPayment.find_by(order_id: self.org_send_seq_id))
+    if self.status == 0 && (k = KaifuGateway.find_by(send_seq_id: self.org_send_seq_id))
+      cp = k.client_payment
       self.client = cp.client
       self.organization_id = cp.org_id
       self.client_payment = cp
