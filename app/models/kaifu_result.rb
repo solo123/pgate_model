@@ -13,6 +13,7 @@ class KaifuResult < ActiveRecord::Base
       self.organization_id = cp.org_id
       self.client_payment = cp
       self.notify_url = cp.notify_url
+      self.org_send_seq_id = cp.order_id
       if self.notify_url.empty?
         self.status = 7
       end
