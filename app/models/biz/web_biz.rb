@@ -12,8 +12,8 @@ module Biz
             order_id: kaifu_result.org_send_seq_id,
             pay_result: kaifu_result.pay_result,
             pay_desc: kaifu_result.pay_desc,
-            amount: kaifu_result.trans_amt,
-            fee: kaifu_result.fee
+            amount: kaifu_result.trans_amt.to_s,
+            fee: kaifu_result.fee.to_s
           }
           if kaifu_result.t0_resp_code == '00'
             js[:pay_desc] += ' T0:' + kaifu_result.t0_resp_desc
@@ -37,8 +37,8 @@ module Biz
         order_id: kaifu_result.org_send_seq_id,
         pay_result: kaifu_result.pay_result,
         pay_desc: kaifu_result.pay_desc,
-        amount: kaifu_result.trans_amt,
-        fee: kaifu_result.fee
+        amount: kaifu_result.trans_amt.to_s,
+        fee: kaifu_result.fee.to_s
       }
       if kaifu_result.t0_resp_code == '00'
         js[:pay_desc] += ' T0:' + kaifu_result.t0_resp_desc
