@@ -14,6 +14,14 @@ module Biz
         {resp_code: '12', resp_desc: "无此交易：#{client_payment.trans_type}"}
       end
     end
+    def send_kaifu_query(payment_query)
+      case payment_query.trans_type
+      when 'Q001'
+        create_q001(payment_query)
+      else
+        {resp_code: '12', resp_desc: "无此交易：#{q.trans_type}"}
+      end
+    end
     def create_b001(client_payment)
       js = {
         send_time: Time.now.strftime("%Y%m%d%H%M%S"),
@@ -26,7 +34,7 @@ module Biz
         card_no: client_payment.card_no,
         name: client_payment.card_holder_name,
         id_num: client_payment.person_id_num,
-        body: "#{client_payment.client.name} - #{client_payment.order_title}",
+        body: client_payment.order_title,
         notify_url: CFG['pooul_notify_url'],
         callback_url: client_payment.callback_url
       }
@@ -47,6 +55,43 @@ module Biz
       }
       return create_kaifu_payment(client_payment, js)
     end
+    def create_q001(payment_query)
+=begin
+      t.belongs_to :payment_query, index: true
+      t.string :send_time
+      t.string :send_seq_id
+      t.string :trans_type
+      t.string :organization_id
+      t.string :org_send_seq_id
+      t.string :trans_time
+      t.string :pay_result
+      t.string :pay_desc
+      t.string :t0_pay_result
+      t.string :t0_pay_desc
+      t.string :resp_code
+      t.string :resp_desc
+      t.string :mac
+      t.string :response_text
+      t.timestamps
+=end
+      js = {
+        send_time: Time.now.strftime("%Y%m%d%H%M%S"),
+        send_seq_id: "P1" + ('%06d' % client_payment.id),
+        trans_type: 'B001',
+        organization_id: CFG['org_id_b0'],
+        pay_pass: client_payment.pay_pass,
+        trans_amt: client_payment.amount.to_s,
+        fee: client_payment.fee.to_s,
+        card_no: client_payment.card_no,
+        name: client_payment.card_holder_name,
+        id_num: client_payment.person_id_num,
+        body: client_payment.order_title,
+        notify_url: CFG['pooul_notify_url'],
+        callback_url: client_payment.callback_url
+      }
+      return create_kaifu_payment(client_payment, js)
+    end
+
     def create_kaifu_payment(client_payment, js)
       kf_js = kaifu_api_format(js)
       mac = js[:mac] = kf_js["mac"] = get_mac(kf_js, client_payment.trans_type)
