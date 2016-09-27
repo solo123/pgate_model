@@ -49,7 +49,7 @@ module Biz
         pay_pass: client_payment.pay_pass,
         trans_amt: client_payment.amount.to_s,
         fee: client_payment.fee.to_s,
-        body: "#{client_payment.client.name} - #{client_payment.order_title}",
+        body: client_payment.order_title},
         notify_url: CFG['pooul_notify_url'],
         callback_url: client_payment.callback_url
       }
