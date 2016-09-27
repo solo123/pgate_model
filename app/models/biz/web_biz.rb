@@ -10,8 +10,6 @@ module Biz
           js = {
             org_id: kaifu_result.organization_id,
             order_id: kaifu_result.org_send_seq_id,
-            resp_code: kaifu_result.resp_code,
-            resp_desc: kaifu_result.resp_desc,
             pay_result: kaifu_result.pay_result,
             pay_desc: kaifu_result.pay_desc,
             amount: kaifu_result.trans_amt,
@@ -37,8 +35,6 @@ module Biz
       js = {
         org_id: kaifu_result.organization_id,
         order_id: kaifu_result.org_send_seq_id,
-        resp_code: kaifu_result.resp_code,
-        resp_desc: kaifu_result.resp_desc,
         pay_result: kaifu_result.pay_result,
         pay_desc: kaifu_result.pay_desc,
         amount: kaifu_result.trans_amt,
