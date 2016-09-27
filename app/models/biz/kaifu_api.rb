@@ -49,7 +49,7 @@ module Biz
         pay_pass: client_payment.pay_pass,
         trans_amt: client_payment.amount.to_s,
         fee: client_payment.fee.to_s,
-        body: client_payment.order_title},
+        body: client_payment.order_title,
         notify_url: CFG['pooul_notify_url'],
         callback_url: client_payment.callback_url
       }
@@ -165,10 +165,10 @@ module Biz
     end
 
     def kaifu_api_format(js)
-      Hash[js.map {|k,v| [k.to_s.camelize(:lower).to_sym, v]}]
+      Hash[js.map {|k,v| [k.to_s.camelize(:lower).to_sym, v]} ]
     end
     def js_to_app_format(js)
-      Hash[js.map {|k,v| [k.to_s.underscore, v]}]
+      Hash[js.map {|k,v| [k.to_s.underscore, v]} ]
     end
 
     def kaifu_mac(mab, key)
