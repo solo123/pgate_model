@@ -1,6 +1,6 @@
 module Biz
   class KaifuApi < BizBase
-    def send_kaifu_payment(client_payment)
+    def self.send_kaifu_payment(client_payment)
       case client_payment.trans_type
       when 'P001'
         create_b001(client_payment)
@@ -14,7 +14,7 @@ module Biz
         {resp_code: '12', resp_desc: "无此交易：#{client_payment.trans_type}"}
       end
     end
-    def send_kaifu_query(payment_query)
+    def self.send_kaifu_query(payment_query)
       case payment_query.trans_type
       when 'Q001'
         create_q001(payment_query)
@@ -22,12 +22,12 @@ module Biz
         {resp_code: '12', resp_desc: "无此交易：#{q.trans_type}"}
       end
     end
-    def create_b001(client_payment)
+    def self.create_b001(client_payment)
       js = {
         send_time: Time.now.strftime("%Y%m%d%H%M%S"),
         send_seq_id: "P1" + ('%06d' % client_payment.id),
         trans_type: 'B001',
-        organization_id: CFG['org_id_b0'],
+        organization_id: AppConfig.get('kaifu.user.d0.org_id'),
         pay_pass: client_payment.pay_pass,
         trans_amt: client_payment.amount.to_s,
         fee: client_payment.fee.to_s,
@@ -35,27 +35,27 @@ module Biz
         name: client_payment.card_holder_name,
         id_num: client_payment.person_id_num,
         body: client_payment.order_title,
-        notify_url: CFG['pooul_notify_url'],
+        notify_url: AppConfig.get('pooul.api.notify_url'),
         callback_url: client_payment.callback_url
       }
       return create_kaifu_payment(client_payment, js)
     end
-    def create_b002(client_payment)
+    def self.create_b002(client_payment)
       js = {
         send_time: Time.now.strftime("%Y%m%d%H%M%S"),
         send_seq_id: "P2" + ('%06d' % client_payment.id),
         trans_type: 'B002',
-        organization_id: CFG['org_id_t1'],
+        organization_id: AppConfig.get('kaifu.user.t1.org_id'),
         pay_pass: client_payment.pay_pass,
         trans_amt: client_payment.amount.to_s,
         fee: client_payment.fee.to_s,
         body: client_payment.order_title,
-        notify_url: CFG['pooul_notify_url'],
+        notify_url: AppConfig.get('pooul.api.notify_url'),
         callback_url: client_payment.callback_url
       }
       return create_kaifu_payment(client_payment, js)
     end
-    def create_q001(payment_query)
+    def self.create_q001(payment_query)
       js = {
         send_time: Time.now.strftime("%Y%m%d%H%M%S"),
         send_seq_id: 'QRY' + ('%06d' % payment_query.id),
@@ -84,7 +84,7 @@ module Biz
         send_time: Time.now.strftime("%Y%m%d%H%M%S"),
         send_seq_id: "P1" + ('%06d' % client_payment.id),
         trans_type: 'B001',
-        organization_id: CFG['org_id_b0'],
+        organization_id: AppConfig.get('kaifu.user.d0.org_id'),
         pay_pass: client_payment.pay_pass,
         trans_amt: client_payment.amount.to_s,
         fee: client_payment.fee.to_s,
@@ -92,14 +92,14 @@ module Biz
         name: client_payment.card_holder_name,
         id_num: client_payment.person_id_num,
         body: client_payment.order_title,
-        notify_url: CFG['pooul_notify_url'],
+        notify_url: AppConfig.get('pooul.api.notify_url'),
         callback_url: client_payment.callback_url
       }
       return create_kaifu_payment(client_payment, js)
     end
 
-    def create_kaifu_payment(client_payment, js)
-      kf_js = kaifu_api_format(js)
+    def self.create_kaifu_payment(client_payment, js)
+      kf_js = js_to_kaifu_format(js)
       mac = js[:mac] = kf_js["mac"] = get_mac(kf_js, client_payment.trans_type)
       gw = KaifuGateway.new(js)
       gw.client_payment = client_payment
@@ -115,14 +115,14 @@ module Biz
       gw.update(ret_js)
       ret_js
     end
-    def create_kaifu_query(payment_query, js)
+    def self.create_kaifu_query(payment_query, js)
       unless kfp = payment_query.client_payment.kaifu_gateway
         return {resp_code: '13', resp_desc: '未找到该订单发送记录'}
       end
       js[:organization_id] = kfp.organization_id,
       js[:org_send_seq_id] = kfp.send_seq_id,
       js[:trans_time] = kfp.send_time[0..7]
-      kf_js = kaifu_api_format(js)
+      kf_js = js_to_kaifu_format(js)
       mac = js[:mac] = kf_js["mac"] = get_mac(kf_js, 'Q001')
       gw = KaifuQuery.new(js)
       gw.payment_query = payment_query
@@ -139,42 +139,27 @@ module Biz
       ret_js
     end
 
-    def get_mac(js, trans_type)
-      mab = get_mab(js)
+    def self.get_mac(js, trans_type)
+      mab = Biz::PubEncrypt.get_mab(js)
       case trans_type
       when 'P001'
-        Digest::MD5.hexdigest(mab + CFG['tmk_b0'])
+        Biz::PubEncrypt.md5(mab + AppConfig.get('kaifu.user.d0.tmk'))
       when 'P002'
-        Digest::MD5.hexdigest(mab + CFG['tmk_b0'])
+        Biz::PubEncrypt.md5(mab + AppConfig.get('kaifu.user.t1.tmk'))
       when 'P003'
-        kaifu_mac(mab, get_mackey)
+        kaifu_mac(mab, AppConfig.get('kaifu.user.d0.skey'))
       when 'P004'
-        kaifu_mac(mab, get_mackey)
+        kaifu_mac(mab, AppConfig.get('kaifu.user.t1.skey'))
       else
         ''
       end
     end
 
-    def get_mab(js)
-      mab = ''
-      js.keys.sort.each {|k| mab << js[k] if k != :mac && js[k] }
-      mab
-    end
-    def get_mackey(refresh = false)
-      if refresh || CFG['mac_key'].nil?
-        biz = Biz::PosEncrypt.new
-        mac_key = KaifuSignin.last.terminal_info
-        key = biz.e_mak_decrypt([mac_key].pack('H*'), CFG['tmk_b0'])
-        CFG['mac_key'] = key.unpack('H*')[0].upcase
-      end
-      CFG['mac_key']
-    end
-
-    def send_kaifu(js, trans_type)
+    def self.send_kaifu(js, trans_type)
       if trans_type == 'P001' || trans_type == 'P002'
-        uri = URI(CFG['openid_api_url'])
+        uri = URI(AppConfig.get('kaifu.api.openid.pay_url'))
       else
-        uri = URI(CFG['app_api_url'])
+        uri = URI(AppConfig.get('kaifu.api.app.pay_url'))
       end
       resp = Net::HTTP.post_form(uri, data: js.to_json)
       if resp.is_a?(Net::HTTPRedirection)
@@ -192,8 +177,8 @@ module Biz
       end
       j
     end
-    def send_kaifu_query(js)
-      uri = URI(CFG['query_url'])
+    def self.send_kaifu_query(js)
+      uri = URI(AppConfig('kaifu.api.openid.query_url'))
       resp = Net::HTTP.post_form(uri, data: js.to_json)
       if resp.is_a?(Net::HTTPOK)
         begin
@@ -219,18 +204,23 @@ module Biz
       j
     end
 
-    def kaifu_api_format(js)
+    def self.js_to_kaifu_format(js)
       Hash[js.map {|k,v| [k.to_s.camelize(:lower).to_sym, v]} ]
     end
-    def js_to_app_format(js)
+    def self.js_to_app_format(js)
       Hash[js.map {|k,v| [k.to_s.underscore, v]} ]
     end
 
-    def kaifu_mac(mab, key)
+    def self.kaifu_mac(mab, key)
       mab = mab.encode('GBK')
-      biz = Biz::PosEncrypt.new
-      r = biz.pos_mac(mab, key)
+      r = Biz::PosEncrypt.pos_mac(mab, key)
       r.unpack('H*')[0][0..7].upcase
+    end
+
+    def self.decrypt_signin_key(key, tmk)
+      Biz::PosEncrypt.e_mak_decrypt([key].pack('H*'), tmk) \
+        .unpack('H*')[0] \
+        .upcase
     end
 
   end

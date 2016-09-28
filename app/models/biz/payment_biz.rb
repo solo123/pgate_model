@@ -32,13 +32,10 @@ module Biz
 
     def self.get_client_mac(js)
       if client = Client.find_by(org_id: js[:org_id])
-        Digest::MD5.hexdigest(get_mab(js) + client.tmk).upcase
+        Digest::MD5.hexdigest(Biz::PubEncrypt.get_mab(js) + client.tmk).upcase
       else
         ''
       end
-    end
-    def self.get_mab(js)
-      js.keys.sort.map{|k| (k != :mac && js[k]) ? js[k].to_s : nil }.join
     end
 
   end

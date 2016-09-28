@@ -43,10 +43,9 @@ module Biz
       if kaifu_result.t0_resp_code == '00'
         js[:pay_desc] += ' T0:' + kaifu_result.t0_resp_desc
       end
-      kf_biz = Biz::KaifuApi.new
-      mab = kf_biz.get_mab(js)
+      mab = Biz::PubEncrypt.get_mab(js)
       key = kaifu_result.client.tmk
-      js[:mac] = Digest::MD5.hexdigest(mab + key)
+      js[:mac] = Biz::PubEncrypt.md5(mab + key)
       puts '--------------'
       puts 'JSon:' + js.to_json
       puts 'mab: ' + mab

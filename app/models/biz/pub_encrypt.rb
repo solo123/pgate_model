@@ -42,6 +42,12 @@ module Biz
         JSON.parse(str).symbolize_keys
       end
     end
+    def self.get_mab(js)
+      js.keys.sort.map{|k| (k != :mac && js[k]) ? js[k].to_s : nil }.join
+    end
+    def self.md5(str)
+      Digest::MD5.hexdigest(str)
+    end
 
   end
 end
