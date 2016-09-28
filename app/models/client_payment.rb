@@ -1,5 +1,6 @@
-class ClientPayment < ActiveRecord::Base
+class ClientPayment < ApplicationRecord
   belongs_to :client
+  has_one :kaifu_gateway
   scope :show_order, -> {order('id desc')}
   D0_FIELDS = %W(order_time order_id order_title pay_pass amount fee card_no card_holder_name person_id_num notify_url callback_url mac)
 

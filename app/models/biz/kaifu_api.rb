@@ -56,6 +56,12 @@ module Biz
       return create_kaifu_payment(client_payment, js)
     end
     def create_q001(payment_query)
+      js = {
+        send_time: Time.now.strftime("%Y%m%d%H%M%S"),
+        send_seq_id: 'QRY' + ('%06d' % payment_query.id),
+        trans_type: 'B003'
+      }
+      return create_kaifu_query(payment_query, js)
 =begin
       t.belongs_to :payment_query, index: true
       t.string :send_time
@@ -100,6 +106,29 @@ module Biz
       gw.save
 
       ret_js = send_kaifu(kf_js, client_payment.trans_type)
+      ret_js[:status] = (ret_js[:resp_code] == '00') ? 8 : 7
+      client_payment.attributes = {
+        resp_code: ret_js[:resp_code],
+        resp_desc: ret_js[:resp_desc],
+        img_url: ret_js[:img_url]
+      }
+      gw.update(ret_js)
+      ret_js
+    end
+    def create_kaifu_query(payment_query, js)
+      unless kfp = payment_query.client_payment.kaifu_gateway
+        return {resp_code: '13', resp_desc: '未找到该订单发送记录'}
+      end
+      js[:organization_id] = kfp.organization_id,
+      js[:org_send_seq_id] = kfp.send_seq_id,
+      js[:trans_time] = kfp.send_time[0..7]
+      kf_js = kaifu_api_format(js)
+      mac = js[:mac] = kf_js["mac"] = get_mac(kf_js, 'Q001')
+      gw = KaifuQuery.new(js)
+      gw.payment_query = payment_query
+      gw.save
+
+      ret_js = send_kaifu_query(kf_js, gw)
       ret_js[:status] = (ret_js[:resp_code] == '00') ? 8 : 7
       client_payment.attributes = {
         resp_code: ret_js[:resp_code],
@@ -155,6 +184,32 @@ module Biz
           body_txt = resp.body.force_encoding('UTF-8')
           j = js_to_app_format(JSON.parse(body_txt)).symbolize_keys
           j[:resp_desc] = '[server] ' + j[:resp_desc]
+        rescue => e
+          j = {resp_code: '99', resp_desc: "ERROR: #{e.message}\n#{body_txt}"}
+        end
+      else
+        j = {resp_code: '96', resp_desc: '系统故障:' + resp.to_s + "\n" + resp.to_hash.to_s}
+      end
+      j
+    end
+    def send_kaifu_query(js)
+      uri = URI(CFG['query_url'])
+      resp = Net::HTTP.post_form(uri, data: js.to_json)
+      if resp.is_a?(Net::HTTPOK)
+        begin
+          body_txt = resp.body.force_encoding('UTF-8')
+          r = js_to_app_format(JSON.parse(body_txt)).symbolize_keys
+          gw.update(r)
+          j = {
+            resp_code: r[:resp_code],
+            resp_desc: "#{r[:resp_desc]} #{r[:t0_resp_desc]}",
+            pay_result: r[:pay_result],
+            pay_desc: r[:pay_desc]
+          }
+          kfp = KaifuGateway.find_by(organizationId: r[:organization_id])
+          cp = kfp.client_payment
+          j[:order_id] = cp.order_id
+          j[:order_time] = cp.order_time
         rescue => e
           j = {resp_code: '99', resp_desc: "ERROR: #{e.message}\n#{body_txt}"}
         end

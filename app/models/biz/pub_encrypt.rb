@@ -35,5 +35,13 @@ module Biz
       r
     end
 
+    def self.json_parse(str)
+      if str.nil? || str.empty? || !str.match( /{.+}/ )
+        {}
+      else
+        JSON.parse(str).symbolize_keys
+      end
+    end
+
   end
 end

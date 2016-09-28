@@ -1,4 +1,4 @@
-class KaifuResult < ActiveRecord::Base
+class KaifuResult < ApplicationRecord
   scope :show_order, -> {order('id desc')}
   scope :not_send, -> {where('status<5')}
 
