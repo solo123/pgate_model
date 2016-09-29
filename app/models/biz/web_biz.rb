@@ -1,6 +1,6 @@
 module Biz
   class WebBiz < BizBase
-    def notify_client(kaifu_result)
+    def self.notify_client(kaifu_result)
       kaifu_result.init_validate
       if kaifu_result.status < 7
         kaifu_result.status += 1
@@ -18,10 +18,9 @@ module Biz
           if kaifu_result.t0_resp_code == '00'
             js[:pay_desc] += ' T0:' + kaifu_result.t0_resp_desc
           end
-          kf_biz = Biz::KaifuApi.new
-          mab = kf_biz.get_mab(js)
+          mab = Biz::KaifuApi.get_mab(js)
           key = kaifu_result.client.tmk
-          js[:mac] = Digest::MD5.hexdigest(mab + key)
+          js[:mac] = Biz::PubEncrypt.md5(mab + key)
           resp = Net::HTTP.post_form(uri, data: js.to_json)
           if resp.is_a?(Net::HTTPOK)
             kaifu_result.status = 8
@@ -31,7 +30,7 @@ module Biz
         kaifu_result.save
       end
     end
-    def notify_client_test(kaifu_result)
+    def self.notify_client_test(kaifu_result)
       js = {
         org_id: kaifu_result.organization_id,
         order_id: kaifu_result.org_send_seq_id,
