@@ -49,5 +49,12 @@ module Biz
       Digest::MD5.hexdigest(str)
     end
 
+    def self.brief_mask(str)
+      if str.length > 8
+        "#{str.first(4)}-XXX-#{str.last(4)}"
+      else
+        str
+      end
+    end
   end
 end

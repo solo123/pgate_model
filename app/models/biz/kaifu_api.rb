@@ -204,6 +204,7 @@ module Biz
       j
     end
 
+
     def self.js_to_kaifu_format(js)
       Hash[js.map {|k,v| [k.to_s.camelize(:lower).to_sym, v]} ]
     end

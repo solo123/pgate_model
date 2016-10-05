@@ -2,22 +2,21 @@ class KaifuResult < ApplicationRecord
   scope :show_order, -> {order('id desc')}
   scope :not_send, -> {where('status<5')}
 
-  belongs_to :recv_post
+  belongs_to :sender, polymorphic: true
   belongs_to :client
   belongs_to :client_payment
+  belongs_to :kaifu_gateway
 
-  def init_validate
-    if self.status == 0 && (k = KaifuGateway.find_by(send_seq_id: self.org_send_seq_id))
+  def init_data
+    if status == 0 && (k = KaifuGateway.find_by(send_seq_id: org_send_seq_id))
+      self.kaifu_gateway = k
       cp = k.client_payment
       self.client = cp.client
-      self.organization_id = cp.org_id
       self.client_payment = cp
       self.notify_url = cp.notify_url
-      self.org_send_seq_id = cp.order_id
       if self.notify_url.empty?
-        self.status = 7
+        status = 7
       end
     end
-
   end
 end
