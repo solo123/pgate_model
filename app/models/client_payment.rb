@@ -2,7 +2,8 @@ class ClientPayment < ApplicationRecord
   belongs_to :client
   has_one :kaifu_gateway
   scope :show_order, -> {order('id desc')}
-  D0_FIELDS = %W(order_time order_id order_title pay_pass amount fee card_no card_holder_name person_id_num notify_url callback_url mac)
+  PAYMENT_FIELDS = %W(order_time order_id order_title pay_pass amount fee notify_url callback_url mac)
+  BANKCARD_FIELDS = %W(card_no card_holder_name person_id_num)
 
   def check_payment_fields
     case trans_type
@@ -18,13 +19,13 @@ class ClientPayment < ApplicationRecord
   end
 
   def check_p001
-    return check_field_and_fee D0_FIELDS
+    return check_field_and_fee PAYMENT_FIELDS + BANKCARD_FIELDS
   end
   def check_p002
-    return check_field_and_fee %W(order_time order_id order_title pay_pass amount fee notify_url callback_url mac)
+    return check_field_and_fee PAYMENT_FIELDS
   end
   def check_p003
-    return check_field_and_fee D0_FIELDS
+    return check_field_and_fee PAYMENT_FIELDS + BANKCARD_FIELDS
   end
   def check_field_and_fee(fields)
     miss_flds =  []

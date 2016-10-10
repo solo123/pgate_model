@@ -1,6 +1,7 @@
 module Biz
   class PaymentBiz < BizBase
     def self.parse_data_json(data)
+      js = {}
       if data.nil? || data.empty?
         return {resp_code: '30', resp_desc: '报文为空'}
       end
@@ -36,6 +37,11 @@ module Biz
       else
         ''
       end
+    end
+
+    def self.update_json(record, js)
+      fields = record.attributes.keys
+      record.attributes = js.reject{|k,v| !fields.member?(k.to_s) }
     end
 
   end

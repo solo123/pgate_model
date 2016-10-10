@@ -21,5 +21,36 @@ module Biz
       puts 'key: ' + key
     end
 
+    def self.post_data(url, data, sender)
+      pd = PostData.new
+      pd.sender = sender
+      pd.url = url
+      pd.data = data
+
+      txt = nil
+      begin
+        uri = URI(url)
+        resp = Net::HTTP.post_form(uri, data: data)
+        pd.response = resp.inspect
+        if resp.is_a?(Net::HTTPOK)
+          txt = pd.body = resp.body.force_encoding('UTF-8')
+        else
+          err = BizError.new
+          err.code = '96'
+          err.message = "系统故障"
+          err.detail = "not HTTPOK!\n" + resp.to_s + "\n" + resp.to_hash.to_s
+          err.error_source = sender
+        end
+      rescue => e
+        err = BizError.new
+        err.code = '96'
+        err.message = "系统故障"
+        err.detail = "request error!\n#{e.message}\n#{body_txt}"
+        err.error_source = sender
+        pd.error_message = e.message
+      end
+      pd.save!
+      txt
+    end
   end
 end
