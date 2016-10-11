@@ -54,7 +54,7 @@ module Biz
       gw.org_send_seq_id = kfp.send_seq_id
       gw.trans_time = kfp.send_time[0..7]
       gw.payment_query = p
-      gw.mac = Biz::KaifuApi.get_mac(gw)
+      gw.mac = Biz::KaifuApi.qry_get_mac(gw)
       gw.save!
       return gw
     end
@@ -82,11 +82,13 @@ module Biz
         kaifu_mac(get_mab(k, FLDS_KAIFU_APP_B001), AppConfig.get('kaifu.user.d0.skey'))
       when 'P004'
         kaifu_mac(get_mab(k, FLDS_KAIFU_APP_B002), AppConfig.get('kaifu.user.t1.skey'))
-      when 'Q001'
-        Biz::PubEncrypt.md5(get_mab(k, FLDS_KAIFU_QUERY) + AppConfig.get('kaifu.user.d0.tmk'))
       else
         nil
       end
+    end
+    #params: k = kaifu_query
+    def self.qry_get_mac(k)
+      Biz::PubEncrypt.md5(get_mab(k, FLDS_KAIFU_QUERY) + AppConfig.get('kaifu.user.d0.tmk'))
     end
     def self.get_mab(k, flds)
       flds.sort.map{|fld| k[fld]}.join

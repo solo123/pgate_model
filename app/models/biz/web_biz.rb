@@ -22,7 +22,7 @@ module Biz
     end
 
     def self.post_data(url, data, sender)
-      pd = PostData.new
+      pd = PostDat.new
       pd.sender = sender
       pd.url = url
       pd.data = data
