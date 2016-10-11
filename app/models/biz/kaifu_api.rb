@@ -95,6 +95,7 @@ module Biz
     end
 
     def self.get_data(k, flds)
+      flds << "mac" unless flds.include?("mac")
       d = flds.map{|f| "\"#{f.camelize(:lower)}\":\"#{k[f].to_s}\""}.join(',')
       "{#{d}}"
     end
