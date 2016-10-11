@@ -50,7 +50,7 @@ module Biz
     end
 
     def self.brief_mask(str)
-      if str.length > 8
+      if str && str.length > 8
         "#{str.first(4)}-XXX-#{str.last(4)}"
       else
         str
