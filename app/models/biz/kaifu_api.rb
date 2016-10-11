@@ -22,7 +22,7 @@ module Biz
       gw.save
       gw
     end
-    
+
     #para: kaifu_gateway
     def self.send_kaifu(k)
       if k.trans_type == 'B001'
@@ -38,7 +38,26 @@ module Biz
       end
     end
 
-
+    # params: p = payment_query
+    def self.create_kaifu_query(p)
+      unless kfp = p.client_payment.kaifu_gateway
+        p.resp_code = '13'
+        p.resp_desc = '未找到该订单发送记录'
+        p.save!
+        return nil
+      end
+      gw = KaifuQuery.new
+      gw.send_time = Time.now.strftime("%Y%m%d%H%M%S")
+      gw.send_seq_id = 'QRY' + ('%06d' % p.id)
+      gw.trans_type = 'B003'
+      gw.organization_id = kfp.organization_id
+      gw.org_send_seq_id = kfp.send_seq_id
+      gw.trans_time = kfp.send_time[0..7]
+      gw.payment_query = p
+      gw.mac = Biz::KaifuApi.get_mac(gw)
+      gw.save!
+      return gw
+    end
     def self.send_kaifu_query(payment_query)
       case payment_query.trans_type
       when 'Q001'
@@ -46,26 +65,6 @@ module Biz
       else
         {resp_code: '12', resp_desc: "无此交易：#{q.trans_type}"}
       end
-    end
-    def self.create_kaifu_query(payment_query)
-      js = {
-        send_time: Time.now.strftime("%Y%m%d%H%M%S"),
-        send_seq_id: 'QRY' + ('%06d' % payment_query.id),
-        trans_type: 'B003',
-        organization_id: AppConfig.get('kaifu.user.d0.org_id')
-      }
-      unless kfp = payment_query.client_payment.kaifu_gateway
-        payment_query.resp_code = '13'
-        payment_query.resp_desc = '未找到该订单发送记录'
-        return nil
-      end
-      js[:organization_id] = kfp.organization_id
-      js[:org_send_seq_id] = kfp.send_seq_id
-      js[:trans_time] = kfp.send_time[0..7]
-      js[:mac] = get_mac(js, 'Q001')
-      gw = KaifuQuery.new(js)
-      gw.payment_query = payment_query
-      return gw
     end
 
     #params: k = kaifu_gateway
