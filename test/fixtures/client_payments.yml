@@ -1,5 +1,5 @@
-
 valid_one:
+  client_id: 1
   org_id: client1
   trans_type: P001
   order_time: 20160915120101

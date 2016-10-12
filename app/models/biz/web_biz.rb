@@ -34,6 +34,13 @@ module Biz
         pd.response = resp.inspect
         if resp.is_a?(Net::HTTPOK)
           txt = pd.body = resp.body.force_encoding('UTF-8')
+        elsif resp.is_a?(Net::HTTPRedirection)
+          if resp['location'].nil?
+            txt = resp.body.match(/<a href=\"([^>]+)\">/i)[1]
+          else
+            txt = resp['location']
+          end
+          pd.body = txt = '{"resp_code":"00","redirect_url":"' + txt + '"}'
         else
           err = BizError.new
           err.code = '96'
@@ -46,13 +53,15 @@ module Biz
         err = BizError.new
         err.code = '96'
         err.message = "系统故障"
-        err.detail = "request error!\n#{e.message}\n#{body_txt}"
+        err.detail = "request error!\n#{e.message}"
         err.error_source = sender
         pd.error_message = e.message
         err.save
       end
       pd.save!
       txt
+    end
+    def redirect_url
     end
     def self.get_tfb(url, data, sender)
       pd = PostDat.new

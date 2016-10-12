@@ -28,6 +28,7 @@ module Biz
 
     #para: kaifu_gateway
     def self.send_kaifu(k)
+      return if k.status > 0
       if k.trans_type == 'B001'
         url = AppConfig.get('kaifu.api.openid.pay_url')
       else
@@ -35,9 +36,15 @@ module Biz
       end
       resp = Biz::WebBiz.post_data(url, get_data(k, FLDS_KAIFU_OPENID_B001) , k)
       if resp
-        js_to_app_format Biz::PubEncrypt.json_parse(resp)
-      else
-        {resp_code: '99', resp_desc: '系统错误'}
+        js = js_to_app_format resp
+        k.resp_code = js['resp_code']
+        k.resp_desc = js['resp_desc']
+        if js['resp_code'] == '00'
+          k.redirect_url = js['redirect_url']
+          k.img_url = js['img_url']
+          k.status = 1
+        end
+        k.save!
       end
     end
 
@@ -98,8 +105,9 @@ module Biz
     end
 
     def self.get_data(k, flds)
-      flds << "mac" unless flds.include?("mac")
-      d = flds.map{|f| "\"#{f.camelize(:lower)}\":\"#{k[f].to_s}\""}.join(',')
+      fs = flds.dup
+      fs << "mac" unless flds.include?("mac")
+      d = fs.map{|f| "\"#{f.camelize(:lower)}\":\"#{k[f].to_s}\""}.join(',')
       "{#{d}}"
     end
     def self.send_kaifu_query(kaifu_query)

@@ -12,4 +12,8 @@ gemspec
 
 # To use a debugger
 # gem 'byebug', group: [:development, :test]
-gem 'mocha'
+group :development, :test do
+  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
+  gem 'byebug', platform: :mri
+  gem 'mocha'
+end

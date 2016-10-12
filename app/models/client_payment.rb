@@ -2,31 +2,38 @@ class ClientPayment < ApplicationRecord
   belongs_to :client
   has_one :kaifu_gateway
   scope :show_order, -> {order('id desc')}
-  PAYMENT_FIELDS = %W(order_time order_id order_title pay_pass amount fee notify_url callback_url mac)
-  BANKCARD_FIELDS = %W(card_no card_holder_name person_id_num)
 
-  def check_payment_fields
-    case trans_type
-    when 'P001'
-      return check_p001
-    when 'P002'
-      return check_p002
-    when 'P003'
-      return check_p003
+  def return_json
+    case status
+    when 0
+      {resp_code: '96', resp_desc: '系统故障，发送失败'}
+    when 1, 8
+      js = {
+        org_id: org_id,
+        trans_type: trans_type,
+        order_time: order_time,
+        order_id: order_id,
+        amount: amount,
+        fee: fee,
+        resp_code: resp_code,
+        resp_desc: resp_desc
+      }
+      js[:redirect_url] = redirect_url if redirect_url
+      js[:img_url] = img_url if img_url
+      if status == 8
+        js[:pay_code] = pay_code
+        js[:pay_desc] = pay_desc
+        js[:t0_code] = t0_code if t0_code
+        js[:t0_desc] = t0_desc if t0_desc
+      end
+      js
+    when 7
+      {resp_code: resp_code, resp_desc: resp_desc}
     else
-      return {resp_code: '12', resp_desc: '无此交易: ' + trans_type}
+      {resp_code: '96', resp_desc: '系统错误，status错'}
     end
   end
 
-  def check_p001
-    return check_field_and_fee PAYMENT_FIELDS + BANKCARD_FIELDS
-  end
-  def check_p002
-    return check_field_and_fee PAYMENT_FIELDS
-  end
-  def check_p003
-    return check_field_and_fee PAYMENT_FIELDS + BANKCARD_FIELDS
-  end
   def check_field_and_fee(fields)
     miss_flds =  []
     fields.each {|fld| miss_flds << fld if self[fld].nil? }

@@ -1,6 +1,7 @@
 # Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
+  id: 1
   name: client1
   org_id: client1
   tmk: 'abcde1234567890'
