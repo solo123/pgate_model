@@ -37,3 +37,18 @@ invalid_mac_one:
   notify_url: http://localhost:3000/abc
   callback_url: http://localhost:3000/def
   status: 0
+
+tfb_one:
+  id: 1001
+  org_id: client1
+  trans_type: T001
+  order_time: 20160915120101
+  order_id: TST001
+  pay_pass: 1
+  amount: 1000
+  fee: 0
+  order_title: test001
+  notify_url: http://localhost:3000/abc
+  callback_url: http://localhost:3000/def
+  mac: 123123
+  status: 0

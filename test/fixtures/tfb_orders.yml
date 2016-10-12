@@ -1,0 +1,13 @@
+ord_1:
+  client_payment_id: 1001
+  input_charset: UTF-8
+  spid: 1234
+  notify_url: http://notify.com
+  sp_billno: ord-001
+  spbill_create_ip: 127.0.0.1
+  pay_type: 800206
+  tran_time: 20161012160101
+  tran_amt: 1000
+  cur_type: CNY
+  item_name: 商品001
+  status: 0

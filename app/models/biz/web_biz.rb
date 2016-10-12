@@ -40,6 +40,7 @@ module Biz
           err.message = "系统故障"
           err.detail = "not HTTPOK!\n" + resp.to_s + "\n" + resp.to_hash.to_s
           err.error_source = sender
+          err.save!
         end
       rescue => e
         err = BizError.new
@@ -48,6 +49,7 @@ module Biz
         err.detail = "request error!\n#{e.message}\n#{body_txt}"
         err.error_source = sender
         pd.error_message = e.message
+        err.save
       end
       pd.save!
       txt

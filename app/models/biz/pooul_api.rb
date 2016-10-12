@@ -11,8 +11,18 @@ module Biz
       client_payment.status = 1
       client_payment.save
 
-      kaifu_gateway = Biz::KaifuApi.create_kaifu_payment(client_payment)
-      Biz::KaifuApi.send_kaifu(kaifu_gateway)
+      case client_payment.trans_type
+      when 'P001', 'P002', 'P003', 'P004'
+        kaifu_gateway = Biz::KaifuApi.create_kaifu_payment(client_payment)
+        Biz::KaifuApi.send_kaifu(kaifu_gateway)
+      when 'T001'
+        c = client_payment
+        ord = Biz::TfbApi.create_tfb_order(c)
+        Biz::TfbApi.send_tfb_order(ord)
+        update_client_payment(ord)
+      else
+        {resp_code: '12', resp_desc: '无此交易：' + client_payment.trans_type.to_s}
+      end
     end
 
     def self.query(payment_query)
@@ -54,5 +64,35 @@ module Biz
       js.symbolize_keys
     end
 
+    def self.update_client_payment(ord)
+      if ord.is_a? TfbOrder
+        c = ord.client_payment
+        c.resp_code = ord.retcode
+        c.resp_desc = ord.retmsg
+        if ord.status == 1
+          c.redirect_url = ord.pay_info
+          c.status = 8
+          c.save!
+          js = {
+            resp_code: '00',
+            resp_desc: c.resp_desc,
+            redirect_url: c.redirect_url,
+            org_id: c.org_id,
+            trans_type: c.trans_type,
+            order_time: c.order_time,
+            order_id: c.order_id,
+            amount: c.amount,
+            fee: c.fee
+          }
+          js
+        else
+          c.status = 7
+          {resp_code: c.resp_code, resp_desc: c.resp_desc}
+        end
+
+      else
+        {resp_code: '99', resp_desc: '无法更新商户交易数据。'}
+      end
+    end
   end
 end
