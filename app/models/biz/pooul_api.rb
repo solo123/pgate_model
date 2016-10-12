@@ -1,8 +1,4 @@
 module Biz
-  FLDS_KAIFU_OPENID_B001 = %W(send_time send_seq_id trans_type organization_id pay_pass trans_amt fee body notify_url callback_url card_no name id_num)
-  FLDS_KAIFU_OPENID_B002 = %W(send_time send_seq_id trans_type organization_id pay_pass trans_amt fee body notify_url callback_url)
-  FLDS_KAIFU_QUERY = %W(send_time send_seq_id trans_type organization_id org_send_seq_id trans_time)
-
   class PooulApi < BizBase
     def self.payment(client_payment)
       chk_js = client_payment.check_payment_fields

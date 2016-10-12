@@ -1,5 +1,8 @@
 module Biz
   class KaifuApi < BizBase
+    FLDS_KAIFU_OPENID_B001 = %W(send_time send_seq_id trans_type organization_id pay_pass trans_amt fee body notify_url callback_url card_no name id_num).freeze
+    FLDS_KAIFU_OPENID_B002 = %W(send_time send_seq_id trans_type organization_id pay_pass trans_amt fee body notify_url callback_url).freeze
+    FLDS_KAIFU_QUERY = %W(send_time send_seq_id trans_type organization_id org_send_seq_id trans_time).freeze
 
     def self.create_kaifu_payment(cp)
       gw = KaifuGateway.new
