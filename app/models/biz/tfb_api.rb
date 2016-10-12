@@ -42,8 +42,9 @@ module Biz
         if rt['retcode'] == '00' && check_rt_equal(FLDS_TFB_REQUEST_ANSWER, ord, rt)
           ord.listid = rt['listid']
           ord.qrcode = rt['qrcode']
-          ord.pay_info = rt['pay_info']
+          ord.pay_info = URI.decode(rt['pay_info']) if rt['pay_info']
           ord.sysd_time = rt['sysd_time']
+
           ord.status = 1
         else
           ord.status = 7
