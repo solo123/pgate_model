@@ -44,5 +44,29 @@ module Biz
       record.attributes = js.reject{|k,v| !fields.member?(k.to_s) }
     end
 
+    #params c = client_payment
+    def self.send_notify(c)
+      notify_time = Time.now
+      js = {
+        org_id: c.org_id,
+        trans_type: c.trans_type,
+        order_time: c.order_time,
+        order_id: c.order_id,
+        resp_code: c.resp_code,
+        resp_desc: c.resp_desc,
+        pay_code: c.pay_code,
+        pay_desc: c.pay_desc,
+        amount: c.amount,
+        notify_time: notify_time.strftime("%Y%m%d%H%M%S")
+      }
+      mab = Biz::PubEncrypt.get_mab(js)
+      js[:mac] = Biz::PubEncrypt.md5(mab + c.client.tmk)
+      txt = Biz::WebBiz.post_data(c.notify_url, js.to_s, c)
+      c.notify_times += 1
+      c.last_notify = notify_time
+      c.notify_status = 8 if txt =~ /(true)|(ok)|(success)/
+      c.save!
+    end
+
   end
 end

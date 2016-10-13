@@ -105,6 +105,7 @@ module Biz
         rev.message = "tfb_order:[#{js['sp_billno']}]没找到！"
       end
       rev.save!
+      ord
     end
   end
 end
