@@ -75,5 +75,36 @@ module Biz
       end
     end
 
+    #params rev = recv_post
+    def self.send_notify(rev)
+      return unless rev.status == 0 && rev.method == 'tfb'
+
+      js = eval(rev.params)
+      js['retmsg'] = js['retmsg'].encode('UTF-8', 'GBK') if js['retmsg']
+      js['item_name'] = js['item_name'].encode('UTF-8', 'GBK') if js['item_name']
+
+      ord = TfbOrder.find_by(sp_billno: js['sp_billno'])
+      if ord
+        flds = %w(listid pay_type tran_amt)
+        if check_rt_equal(flds, ord, js)
+          ord.status = 8
+          ord.save!
+          c = ord.client_payment
+          c.status = 8
+          c.pay_code = '00'
+          c.pay_desc = '支付成功'
+          c.save!
+
+          rev.status = 8
+        else
+          rev.status = 7
+          rev.message = 'tfb_order信息与回调值不匹配！'
+        end
+      else
+        rev.status = 7
+        rev.message = "tfb_order:[#{js['sp_billno']}]没找到！"
+      end
+      rev.save!
+    end
   end
 end
