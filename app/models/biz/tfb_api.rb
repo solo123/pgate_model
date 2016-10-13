@@ -86,7 +86,7 @@ module Biz
       ord = TfbOrder.find_by(sp_billno: js['sp_billno'])
       if ord
         flds = %w(listid pay_type tran_amt)
-        if check_rt_equal(flds, ord, js)
+        if check_rt_equal(flds, ord, js) && js['tran_state'] == '1'
           ord.status = 8
           ord.save!
           c = ord.client_payment
@@ -98,7 +98,7 @@ module Biz
           rev.status = 8
         else
           rev.status = 7
-          rev.message = 'tfb_order信息与回调值不匹配！'
+          rev.message = 'tfb_order信息与回调值不匹配，或tran_state不对。'
         end
       else
         rev.status = 7
