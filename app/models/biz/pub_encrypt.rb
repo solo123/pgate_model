@@ -48,6 +48,9 @@ module Biz
     def self.md5(str)
       Digest::MD5.hexdigest(str)
     end
+    def self.get_mac(js, key)
+      md5(get_mab(js) + key)
+    end
 
     def self.brief_mask(str)
       if str && str.length > 8

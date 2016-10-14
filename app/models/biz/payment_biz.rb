@@ -61,7 +61,7 @@ module Biz
       }
       mab = Biz::PubEncrypt.get_mab(js)
       js[:mac] = Biz::PubEncrypt.md5(mab + c.client.tmk)
-      txt = Biz::WebBiz.post_data(c.notify_url, js.to_s, c)
+      txt = Biz::WebBiz.post_data(c.notify_url, js.to_json, c)
       c.notify_times += 1
       c.last_notify = notify_time
       c.notify_status = 8 if txt =~ /(true)|(ok)|(success)/
