@@ -7,6 +7,7 @@ module Biz
       ord = TfbOrder.new
       ord.spid = AppConfig.get('tfb.api.spid')
       ord.notify_url = AppConfig.get('tfb.api.notify_url')
+      ord.pay_show_url = cp.callback_url
       ord.sp_billno = "T1" + ('%06d' % cp.id)
       ord.spbill_create_ip = cp.remote_ip
       ord.pay_type = '800206'
