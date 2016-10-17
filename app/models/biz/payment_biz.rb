@@ -52,12 +52,14 @@ module Biz
         trans_type: c.trans_type,
         order_time: c.order_time,
         order_id: c.order_id,
+        amount: c.amount,
+        attach_info: c.attach_info,
         resp_code: c.resp_code,
         resp_desc: c.resp_desc,
         pay_code: c.pay_code,
         pay_desc: c.pay_desc,
-        amount: c.amount,
-        notify_time: notify_time.strftime("%Y%m%d%H%M%S")
+        notify_time: notify_time.strftime("%Y%m%d%H%M%S"),
+        op_time: c.updated_at.strftime("%Y%m%d%H%M%S")
       }
       mab = Biz::PubEncrypt.get_mab(js)
       js[:mac] = Biz::PubEncrypt.md5(mab + c.client.tmk)
@@ -66,6 +68,28 @@ module Biz
       c.last_notify = notify_time
       c.notify_status = 8 if txt =~ /(true)|(ok)|(success)/
       c.save!
+    end
+
+    def self.pay_query(org_id, order_time, order_id)
+      uid = "#{org_id}-#{order_time[0..7]}-#{order_id}"
+      if cp = ClientPayment.find_by(uni_order_id: uid)
+        fields = [:org_id, :trans_type, :order_time, :order_id, :order_title, :img_url, :amount, :fee, :card_no, :card_holder_name, :person_id_num, :notify_url, :callback_url, :mac, :created_at, :redirect_url, :pay_code, :pay_desc, :t0_code, :t0_desc, :remote_ip, :uni_order_id, :notify_times, :notify_status, :last_notify, :attach_info, :sp_udid, :pay_time, :close_time, :refund_id]
+        js = db_2_json(fields, cp)
+        js['resp_code'] = '00'
+        js['mac'] = Biz::PubEncrypt.md5_mac(js, cp.client.tmk)
+        js
+      else
+        {resp_code: '12', resp_desc: "无此交易: #{uid}"}
+      end
+
+    end
+
+    def self.db_2_json(fields, db)
+      js = {}
+      fields.each do |fld|
+        js[fld] = db[fld] if db[fld]
+      end
+      js
     end
 
   end

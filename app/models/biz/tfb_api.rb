@@ -108,5 +108,44 @@ module Biz
       rev.save!
       ord
     end
+
+    #params: ord = tfb_order
+    def self.send_query(ord)
+      url = AppConfig.get('tfb.api.query_url')
+      tmk = AppConfig.get('tfb.api.key')
+      js = {
+        spid: ord.spid,
+        listid: ord.listid
+      }
+      js[:sign] = js_mac(js, ord.client_payment.client.tmk)
+      ret = Biz::WebBiz.get_tfb(url, js, ord)
+      if ret && (rt = ret['root'])
+        if rt['retcode'] == '00' && rt['spid'] == ord.spid
+          if rt['record'] && rt['record']['listid'] == ord.listid
+            ord.state = rt['record']['state']
+            ord.pay_time = rt['record']['pay_time']
+            ord.close_time = rt['record']['close_time']
+            if ord.state == '3'
+              ord.tran_state = '1'
+              ord.status = 8
+            end
+            if ord.state == '4'
+              ord.tran_state = '0'
+              ord.status = 7
+            end
+            if ord.state == '5'
+              ord.status = 7
+            end
+          end
+        end
+      else
+      end
+      ord.save!
+    end
+
+    def self.js_mac(js, tmk)
+      mab = js.keys.sort.map{|k| "#{k}=#{js[k.to_sym]}"}.join('&')
+      Biz::PubEncrypt.md5(mab + "&key=#{tmk}").upcase
+    end
   end
 end
