@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161017162213) do
+ActiveRecord::Schema.define(version: 20161025153306) do
 
   create_table "app_configs", force: :cascade do |t|
     t.string   "group"
@@ -38,6 +38,14 @@ ActiveRecord::Schema.define(version: 20161017162213) do
     t.integer  "status",     default: 0
     t.datetime "created_at",             null: false
     t.datetime "updated_at",             null: false
+  end
+
+  create_table "cards", force: :cascade do |t|
+    t.string   "card_num"
+    t.string   "holder_name"
+    t.string   "person_id_num"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
   end
 
   create_table "client_payments", force: :cascade do |t|
@@ -204,6 +212,45 @@ ActiveRecord::Schema.define(version: 20161017162213) do
     t.index ["sender_type", "sender_id"], name: "index_notifies_on_sender_type_and_sender_id"
   end
 
+  create_table "orgs", force: :cascade do |t|
+    t.string   "name"
+    t.string   "org_num"
+    t.string   "tmk"
+    t.integer  "d0_rate"
+    t.integer  "d0_min_fee"
+    t.integer  "t1_rate"
+    t.integer  "status",     default: 0
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
+  end
+
+  create_table "pay_recvs", force: :cascade do |t|
+    t.integer  "payment_id"
+    t.string   "remote_ip"
+    t.string   "data"
+    t.string   "params"
+    t.datetime "time_recv"
+    t.string   "resp"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["payment_id"], name: "index_pay_recvs_on_payment_id"
+  end
+
+  create_table "pay_results", force: :cascade do |t|
+    t.integer  "send_code"
+    t.string   "send_desc"
+    t.datetime "send_time"
+    t.integer  "pay_code"
+    t.string   "pay_desc"
+    t.datetime "pay_time"
+    t.integer  "t0_code"
+    t.string   "t0_desc"
+    t.string   "pay_url"
+    t.string   "barcode_url"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
   create_table "payment_queries", force: :cascade do |t|
     t.integer  "client_id"
     t.string   "org_id"
@@ -221,6 +268,32 @@ ActiveRecord::Schema.define(version: 20161017162213) do
     t.string   "t0_code"
     t.string   "t0_desc"
     t.index ["client_id"], name: "index_payment_queries_on_client_id"
+  end
+
+  create_table "payments", force: :cascade do |t|
+    t.string   "app_id"
+    t.string   "open_id"
+    t.integer  "org_id"
+    t.string   "order_num"
+    t.string   "order_time"
+    t.string   "order_title"
+    t.string   "attach_info"
+    t.string   "uni_order_num"
+    t.integer  "amount"
+    t.integer  "fee"
+    t.string   "remote_ip"
+    t.string   "terminal_num"
+    t.string   "method"
+    t.string   "callback_url"
+    t.string   "notify_url"
+    t.integer  "card_id"
+    t.integer  "pay_result_id"
+    t.integer  "status",        default: 0
+    t.datetime "created_at",                null: false
+    t.datetime "updated_at",                null: false
+    t.index ["card_id"], name: "index_payments_on_card_id"
+    t.index ["org_id"], name: "index_payments_on_org_id"
+    t.index ["pay_result_id"], name: "index_payments_on_pay_result_id"
   end
 
   create_table "post_dats", force: :cascade do |t|
