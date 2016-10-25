@@ -1,0 +1,2 @@
+class PayRecv < ApplicationRecord
+end

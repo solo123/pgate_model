@@ -1,0 +1,2 @@
+class PayResult < ApplicationRecord
+end
