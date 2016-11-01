@@ -1,2 +1,0 @@
-class BizLog < ApplicationRecord
-end
