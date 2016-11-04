@@ -35,13 +35,6 @@ module Biz
       r
     end
 
-    def self.json_parse(str)
-      if str.nil? || str.empty? || !str.match( /{.+}/ )
-        {}
-      else
-        JSON.parse(str).symbolize_keys
-      end
-    end
     def self.get_mab(js)
       js.keys.sort.map{|k| (k != :mac && js[k]) ? js[k].to_s : nil }.join
     end
