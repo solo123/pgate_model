@@ -20,8 +20,8 @@ module Biz
 
     def self.gen_js(fields, dt)
       js = {}
-      fields.keys.each do |k|
-        js[k.to_sym] = dt[k] if dt[k]
+      fields.each do |k, v|
+        js[k.to_sym] = dt[v] if dt[v]
       end
       js
     end
