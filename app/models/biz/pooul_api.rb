@@ -70,7 +70,7 @@ module Biz
       Digest::MD5.hexdigest(str)
     end
     def self.get_mac(js, key)
-      md5(get_mab(js) + key).upcase
+      md5(get_mab(js) + "&key=#{key}").upcase
     end
 
 
