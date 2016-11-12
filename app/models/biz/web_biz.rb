@@ -12,7 +12,7 @@ module Biz
         resp = Net::HTTP.post_form(uri, data)
         pd.resp_type = resp.inspect
         if resp.is_a?(Net::HTTPOK)
-          pd.resp_body = resp.body.force_encoding('UTF-8')
+          pd.resp_body = resp.body.force_encoding('utf-8')
         elsif resp.is_a?(Net::HTTPRedirection)
           if resp['location'].nil?
             pd.resp_body = resp.body.match(/<a href=\"([^>]+)\">/i)[1]
