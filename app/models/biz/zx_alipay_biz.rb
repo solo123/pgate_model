@@ -48,7 +48,8 @@ module Biz
       }
 
       mab = get_mab(params)
-      sign = rsa_sign(File.read("#{Rails.root}/../keys/test_k"), mab)
+      key_path = AppConfig.get('pooul', 'keys_path')
+      sign = rsa_sign(File.read("#{key_path}/pooul_rsa_private.pem"), mab)
       params[:sign] = sign
       pd = WebBiz.post_data(payment.method, url, params, payment)
       js_ret = Biz::PublicTools.parse_json(pd.resp_body)
