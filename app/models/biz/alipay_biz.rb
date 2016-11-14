@@ -8,17 +8,17 @@ module Biz
     def gen_response_json
     end
 
-    def rsa_sign(key, string)
+    def self.rsa_sign(key, string)
       rsa = OpenSSL::PKey::RSA.new(key)
       Base64.strict_encode64(rsa.sign('sha1', string))
     end
 
-    def rsa_verify?(key, string, sign)
+    def self.rsa_verify?(key, string, sign)
       rsa = OpenSSL::PKey::RSA.new(key)
       rsa.verify('sha1', Base64.strict_decode64(sign), string)
     end
 
-    def get_mab(js)
+    def self.get_mab(js)
       js.sort.map { |item| item.join('=') }.join('&')
     end
   end

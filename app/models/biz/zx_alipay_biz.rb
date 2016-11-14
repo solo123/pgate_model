@@ -47,12 +47,12 @@ module Biz
         biz_content: js_biz.to_json
       }
 
-      mab = get_mab(params)
+      mab = AlipayBiz.get_mab(params)
       key_path = AppConfig.get('pooul', 'keys_path')
-      sign = rsa_sign(File.read("#{key_path}/pooul_rsa_private.pem"), mab)
+      sign = AlipayBiz.rsa_sign(File.read("#{key_path}/pooul_rsa_private.pem"), mab)
       params[:sign] = sign
       pd = WebBiz.post_data(payment.method, url, params, payment)
-      js_ret = Biz::PublicTools.parse_json(pd.resp_body)
+      js_ret = PublicTools.parse_json(pd.resp_body)
       if js_ret
         js_rep = js_ret[:alipay_trade_precreate_response]
         if js_rep && js_rep['code'] == '10000' && (js_rep['out_trade_no'] == '...' || js_rep['out_trade_no'] == pay_result.uni_order_num)
