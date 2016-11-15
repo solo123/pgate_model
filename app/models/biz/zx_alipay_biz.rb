@@ -33,7 +33,10 @@ module Biz
       js_biz = {
         out_trade_no: pay_result.uni_order_num,
         total_amount: (payment.amount / 100.0).to_s,
-        subject: payment.order_title
+        subject: payment.order_title,
+        sub_merchant: {
+          merchant_id: '16392481404'
+        }
       }
       params = {
         app_id: app_id,
