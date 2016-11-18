@@ -45,7 +45,7 @@ module Biz
         charset: 'UTF-8',
         timestamp: Time.now.to_s[0..18],
         version: '1.0',
-        notify_url: 'http://112.74.184.236:8008/notify/zx_alipay',
+        notify_url: "http://112.74.184.236:8008/notify/#{pay_result.uni_order_num}/zx_alipay",
         app_auth_token: '201611BB381c6d470b204e85bfb4994a25aa6X22',
         biz_content: js_biz.to_json
       }
