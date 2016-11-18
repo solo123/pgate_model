@@ -27,7 +27,7 @@ module Biz
       app_id = '2016101502183655'
       pay_result = payment.pay_result || payment.build_pay_result
       pay_result.uni_order_num = "PUL-#{payment.id.to_s.rjust(8, '0')}"
-      pay_result.send_time = Time.now
+      pay_result.send_time = Time.current
       pay_result.channel_name = channel_name
 
       js_biz = {
@@ -43,9 +43,9 @@ module Biz
         method: 'alipay.trade.precreate',
         sign_type: 'RSA',
         charset: 'UTF-8',
-        timestamp: Time.now.to_s[0..18],
+        timestamp: Time.current.to_s[0..18],
         version: '1.0',
-        notify_url: "http://112.74.184.236:8008/notify/#{pay_result.uni_order_num}/zx_alipay",
+        notify_url: "http://112.74.184.236:8008/notify/zx_alipay/#{pay_result.uni_order_num}",
         app_auth_token: '201611BB381c6d470b204e85bfb4994a25aa6X22',
         biz_content: js_biz.to_json
       }
