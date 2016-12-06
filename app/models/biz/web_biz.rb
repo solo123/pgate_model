@@ -29,6 +29,42 @@ module Biz
       pd.save!
       pd
     end
+    def self.post_xml(method, url, data, sender)
+      pd = SentPost.new
+      pd.method = method
+      pd.sender = sender
+      pd.post_url = url
+      pd.post_data = data
+
+      begin
+        uri = URI(url)
+        https = Net::HTTP.new(uri.host, uri.port)
+        https.use_ssl = (uri.scheme == "https")
+        https.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+        req = Net::HTTP::Post.new(uri, initheader = {"Content-Type": "text/xml"})
+        req.body = data
+
+        https.start {|http| resp = http.request(req) }
+        pd.resp_type = resp.inspect
+        if resp.is_a?(Net::HTTPOK)
+          pd.resp_body = resp.body.force_encoding('utf-8')
+        elsif resp.is_a?(Net::HTTPRedirection)
+          if resp['location'].nil?
+            pd.resp_body = resp.body.match(/<a href=\"([^>]+)\">/i)[1]
+          else
+            pd.resp_body = resp['location']
+          end
+          pd.resp_body = "redirect_url:" + pd.resp_body
+        else
+          pd.result_message = "not HTTPOK!\n" + resp.to_s + "\n" + resp.to_hash.to_s
+        end
+      rescue => e
+        pd.result_message = "request error!\n#{e.message}"
+      end
+      pd.save!
+      pd
+    end
 
   end
 end
