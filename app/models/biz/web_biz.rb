@@ -45,7 +45,10 @@ module Biz
         req = Net::HTTP::Post.new(uri, initheader = {"Content-Type": "text/xml"})
         req.body = data
 
-        https.start {|http| resp = http.request(req) }
+        resp = nil
+        https.start do |http|
+          resp = http.request(req)
+        end
         pd.resp_type = resp.inspect
         if resp.is_a?(Net::HTTPOK)
           pd.resp_body = resp.body.force_encoding('utf-8')
