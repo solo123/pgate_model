@@ -5,7 +5,7 @@ module Biz
       pd.method = method
       pd.sender = sender
       pd.post_url = url
-      pd.post_data = data.truncate(2000, omission: '... (to long)')
+      pd.post_data = data.to_s.truncate(2000, omission: '... (to long)')
 
       begin
         uri = URI(url)
