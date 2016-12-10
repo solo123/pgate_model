@@ -1,7 +1,8 @@
 class ZxMct < ApplicationRecord
   belongs_to :org
-  has_many :zx_contr_info_lists, foreign_key: 'zx_mercht_id'
-  
+  has_many :zx_contr_info_lists, foreign_key: 'zx_mercht_id', :dependent => :destroy
+  accepts_nested_attributes_for :zx_contr_info_lists, :allow_destroy => true
+
   def is_nt_citic_enum
     {'是': '1', '否': '0'}
   end
