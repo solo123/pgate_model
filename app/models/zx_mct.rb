@@ -3,6 +3,10 @@ class ZxMct < ApplicationRecord
   has_many :zx_contr_info_lists, foreign_key: 'zx_mercht_id', :dependent => :destroy
   accepts_nested_attributes_for :zx_contr_info_lists, :allow_destroy => true
 
+  def status_enum
+    {'新中信商户': 0, '已发送': 1, '提交数据错误': 2, '已生效': 3, '已停用': 4 }
+  end
+
   def is_nt_citic_enum
     {'是': '1', '否': '0'}
   end
