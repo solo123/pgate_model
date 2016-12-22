@@ -6,6 +6,6 @@ class Payment < ApplicationRecord
   has_many :sent_posts, as: :sender
 
   def status_enum
-    {'已完成': 8, '已发送': 1, '支付失败': 7 }
+    {'无': ' ', '已完成': 8, '已发送': 1, '支付失败': 7}
   end
 end
