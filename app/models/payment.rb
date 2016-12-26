@@ -4,4 +4,8 @@ class Payment < ApplicationRecord
   belongs_to :org, optional: true
   has_one :pay_result
   has_many :sent_posts, as: :sender
+
+  def status_enum
+    {'无': ' ', '已完成': 8, '已发送': 1, '支付失败': 7}
+  end
 end
