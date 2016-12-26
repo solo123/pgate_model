@@ -8,13 +8,13 @@ class ZxMct < ApplicationRecord
   end
 
   def is_nt_citic_enum
-    {'是': '1', '否': '0'}
+    {'是': '0', '否': '1'}
   end
   def pay_chnl_encd_enum
     {'支付宝': '0001', '微信支付': '0002'}
   end
   def acct_typ_enum
-    {'中信银行对私账户': '1', '中信银行对公账户': '2'}
+    {'中信银行对私账户': '1', '中信银行对公账户': '2', '中信银行内部账户': '3', '它行': '4'}
   end
   def is_nt_two_line_enum
     {'是': '1', '否': '0'}
